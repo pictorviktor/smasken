@@ -79,9 +79,19 @@ model.fit(x_train, y_train)
 y_pred = model.predict(x_test)
 accuracy = accuracy_score(y_test, y_pred)
 error = round(np.mean(model.predict(x_test) != y_test),3)
-print('Test error:', error)
-print('accuracy', accuracy)
-print(accuracy+error)
+# print('Test error:', error)
+# print('accuracy', accuracy)
+# print(accuracy+error)
+
+#Naive 
+naive_guess = train[train['Lead'] == 'Male']
+number_of_data_points = naive_guess.shape[0]
+print('Naive guess is', number_of_data_points, 'out of', train.shape[0], 'is male')
+print('this equals to', round(number_of_data_points/train.shape[0], 3), 'of the whole dataset')
+
+
+
+
 #Visualizing the graph
 # dot_data = tree.export_graphviz(model, out_file=None, feature_names= x_train.columns, class_names = model.classes_, filled=True, rounded=True, leaves_parallel=True, proportion=True)
 # graph = graphviz.Source(dot_data)
