@@ -26,7 +26,7 @@ np.set_printoptions(precision=3)
 # Model
 np.random.seed(1)
 model = skl_lm.LogisticRegression(solver='liblinear')
-X_train, X_test, y_train, y_test = skl_ms.train_test_split(X,y,test_size=0.3)
+X_train, X_test, y_train, y_test = skl_ms.train_test_split(X,y,test_size=0.23)
 
 model.fit(X_train, y_train)
 print(model)

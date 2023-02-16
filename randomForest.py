@@ -28,13 +28,13 @@ np.random.seed(1)
 trainingIndex = np.random.choice(train.shape[0], size=780, replace=False)
 trainingSet = train.iloc[trainingIndex] 
 testSet = train.iloc[~train.index.isin(trainingIndex)]   
-# print(train.info())
+print(train.info())
 # print(train.head())
+
 x_train = trainingSet.copy().drop(columns=['Lead'])
 y_train = trainingSet['Lead']
 x_test = testSet.copy().drop(columns=['Lead'])
 y_test = testSet['Lead']
-
 
 # Modeling
 model = RandomForestClassifier(n_estimators=200) #Adding oob_score, max_depth or more estimators- 
@@ -50,14 +50,21 @@ scores = cross_val_score(model, x_train, y_train, cv=10)
 
 # Calculate the mean accuracy across the 5 folds
 mean_accuracy = np.mean(scores)
-#print(scores)
-print('mean accuracy', mean_accuracy)
+print('scores',scores)
+print('Cross validation mean accuracy', mean_accuracy)
 #Naive guess
 
 naive_guess = train[train['Lead'] == 'Male']
 number_of_data_points = naive_guess.shape[0]
 # print('Naive guess is', number_of_data_points, 'out of', train.shape[0], 'is male')
 # print('this equals to', round(number_of_data_points/train.shape[0], 3), 'of the whole dataset')
+
+
+
+
+
+
+
 
 # #Visualizing the graph
 # dot_data = export_graphviz(
