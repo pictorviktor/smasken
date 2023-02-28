@@ -1,30 +1,20 @@
 from turtle import clear
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
-import sklearn.preprocessing as skl_pre
-import sklearn.linear_model as skl_lm
-import sklearn.discriminant_analysis as skl_da
-import sklearn.neighbors as skl_nb
 from IPython.core.pylabtools import figsize
-from IPython.display import Image
 from sklearn.ensemble import BaggingClassifier, RandomForestClassifier
 from sklearn.feature_selection import VarianceThreshold
-import graphviz
 from sklearn.tree import export_graphviz
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 from subprocess import call
-import pydot
-
-
 
 figsize(10,6) # width and height
 
 # Fetch data from csv
 train = pd.read_csv('/Users/admin/Documents/CodeProjects/numpy_projects/train.csv')
 #setting up the training/testing-data
-np.random.seed(1)
+np.random.seed(4)
 trainingIndex = np.random.choice(train.shape[0], size=780, replace=False)
 trainingSet = train.iloc[trainingIndex] 
 testSet = train.iloc[~train.index.isin(trainingIndex)]   
@@ -58,11 +48,6 @@ naive_guess = train[train['Lead'] == 'Male']
 number_of_data_points = naive_guess.shape[0]
 # print('Naive guess is', number_of_data_points, 'out of', train.shape[0], 'is male')
 # print('this equals to', round(number_of_data_points/train.shape[0], 3), 'of the whole dataset')
-
-
-
-
-
 
 
 
