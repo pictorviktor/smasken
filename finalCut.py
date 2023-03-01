@@ -1,6 +1,7 @@
 # Grupp 26
 
 # Dependencies
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import sklearn.linear_model as skl_lm
@@ -11,14 +12,16 @@ import matplotlib.pyplot as plt
 from IPython.core.pylabtools import figsize
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import GridSearchCV
 # fetch data for intial questions
 trainInt = pd.read_csv('/Users/admin/Documents/CodeProjects/numpy_projects/train.csv')
+test = pd.read_csv('/Users/admin/Documents/CodeProjects/numpy_projects/test.csv').drop(columns=['Total words'])
 
 # To get nicer plots
 from IPython.display import set_matplotlib_formats
-# set_matplotlib_formats('svg') # Output as svg. Else you can try png
-# figsize(10, 6) # Width and hight
-# np.set_printoptions(precision=3)
+set_matplotlib_formats('svg') # Output as svg. Else you can try png
+figsize(10, 6) # Width and hight
+np.set_printoptions(precision=3)
 
 # Has gender balance in speaking roles changed over time (i.e. years)?
 def balance_plot(trainInt):
@@ -74,9 +77,8 @@ def money_maker(trainInt):
     plt.title('Average Gross of movies with most spoken words')
 
 # Initial manipulation of data
-
 train = pd.read_csv('train.csv').dropna().reset_index(drop=True)
-
+train['Lead'] = train['Lead'].replace({'Male': 0, 'Female': 1})
 X = train.drop(columns=['Lead'])
 y = train['Lead']
 
@@ -159,10 +161,27 @@ y_dropped = train['Lead']
 
 #Logistic Regression
 def log_reg(X_dropped, y_dropped):
+    # paramDict = {
+    #     'penalty' : [None,'l2','l1', 'elasticnet'],
+    #     'dual' : [True,False],
+    #     'fit_intercept' : [True,False],
+    #     'intercept_scaling' : [1,2,3,4,5,6],
+    #     'class_weight' : [1,'balanced'],
+    #     'solver' : ['liblinear','sag','saga','lbfgs','newton-cg','newton-cholesky']
+    # }
+    # GS = GridSearchCV(estimator = skl_lm.LogisticRegression(),
+    #                   param_grid= paramDict,
+    #                   scoring = ['r2', 'neg_root_mean_squared_error'],
+    #                   refit = 'r2',
+    #                   cv = 10,
+    #                   verbose = 4
+    #                   )
+    # GS.fit(X_dropped, y_dropped)
+    # print('best parameter', GS.best_params_)
     np.random.seed(1)
     X_train, X_test, Y_train, Y_test = skl_ms.train_test_split(X_dropped,y_dropped,test_size=0.3)
 
-    model = skl_lm.LogisticRegression(solver='liblinear')
+    model = skl_lm.LogisticRegression(solver='liblinear',penalty='elasticnet')
     model.fit(X_train,Y_train)
 
     print('Model summary:')
@@ -193,7 +212,19 @@ def log_reg(X_dropped, y_dropped):
 # LDA, QDA
 def LDA_QDA(X_dropped, y_dropped):
     np.random.seed(1)
-
+    # paramDict = {
+    #     'store_covariance' : [True,False],
+    #     'reg_param' : [0,1,2,-1,-2]
+    # }
+    # GS = GridSearchCV(estimator = skl_da.QuadraticDiscriminantAnalysis(),
+    #                   param_grid= paramDict,
+    #                   scoring = ['r2', 'neg_root_mean_squared_error'],
+    #                   refit = 'r2',
+    #                   cv = 10,
+    #                   verbose = 4
+    #                   )
+    # GS.fit(X_dropped, y_dropped)
+    # print('best parameter', GS.best_params_)
     X_train, X_test, Y_train, Y_test = skl_ms.train_test_split(X_dropped,y_dropped,test_size=0.3)
 
     model=skl_da.QuadraticDiscriminantAnalysis()
@@ -224,6 +255,7 @@ def LDA_QDA(X_dropped, y_dropped):
     mean_accuracy = np.mean(scores)
     print(scores)
     print('mean accuracy', mean_accuracy)
+    return model
 
 # kNN
 def kNN(X_dropped,y_dropped):
@@ -260,19 +292,32 @@ def kNN(X_dropped,y_dropped):
 ### Tree-based methods
 
 def random_forest(X_dropped, y_dropped):
+    # estimators = [int(x) for x in np.linspace(start=10,stop=350,num=10)]
+    # paramDict = {
+    #     'n_estimators' : estimators,
+    #     'max_features' : ['sqrt', 'auto'],
+    #     'bootstrap' : [True,False],
+    #     'oob_score' : [True,False]
+    # }
+    # GS = GridSearchCV(estimator = RandomForestClassifier(),
+    #                   param_grid= paramDict,
+    #                   cv = 10,
+    #                   verbose = 2
+    #                   )
+    # GS.fit(X_dropped, y_dropped)
+    # print(GS.best_params_)
     # setting up the training/testing-data
-    np.random.seed(4)
+    np.random.seed(1)
     X_train, X_val, y_train, y_val = skl_ms.train_test_split(X_dropped,y_dropped,test_size=0.25) 
-    print(train.info())
+    #print(train.info())
 
     # Modeling
-    model = RandomForestClassifier(n_estimators=200) #Adding oob_score, max_depth or more estimators- 
-    #does not result in better model in this case
+    model = RandomForestClassifier(n_estimators=300)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_val)
     accuracy = accuracy_score(y_val, y_pred)
     error = round(np.mean(model.predict(X_val) != y_val),3)
-    print('Test error:', error,' and accuracy', accuracy)
+    #print('Test error:', error,' and accuracy', accuracy)
 
     # Perform cross-validation
     scores = skl_ms.cross_val_score(model, X_dropped, y_dropped, cv = 10)
@@ -281,15 +326,27 @@ def random_forest(X_dropped, y_dropped):
     print('mean accuracy', mean_accuracy)
 
     # Calculate the mean accuracy across the 5 folds
-    # mean_accuracy = np.mean(scores)
-    # print('scores',scores)
-    # print('Cross validation mean accuracy', mean_accuracy)
+    mean_accuracy = np.mean(scores)
+    print('scores',scores)
+    print('Cross validation mean accuracy', mean_accuracy)
+
+def test_model(test,X_dropped,y_dropped):
+    model = LDA_QDA(X_dropped, y_dropped)
+    prediction = model.predict(test)
+    binaryPred = [1 if i in 'Female' else 0 for i in prediction]
+    print(prediction)
+    print(binaryPred, 'number of males', binaryPred.count(0),'out of', len(binaryPred))
+    predOutput = pd.DataFrame(binaryPred).T
+    filepath = Path('/Users/admin/Documents/CodeProjects/numpy_projects/predictions.csv')
+    predOutput.to_csv(filepath, index=False)
+
 
 #Running models
-balance_plot(trainInt)
+# balance_plot(trainInt)
 # men_vs_women(trainInt)
 # money_maker(trainInt)
-# kNN(X_dropped, y_dropped)
-# LDA_QDA(X_dropped, y_dropped)
-# log_reg(X_dropped, y_dropped)
-# random_forest(X_dropped, y_dropped)
+#kNN(X_dropped, y_dropped)
+#LDA_QDA(X_dropped, y_dropped)
+log_reg(X_dropped, y_dropped)
+#random_forest(X_dropped, y_dropped)
+#test_model(test, X_dropped, y_dropped)
