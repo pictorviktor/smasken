@@ -13,6 +13,7 @@ from IPython.core.pylabtools import figsize
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
+import sklearn.metrics as skl_me
 # fetch data for intial questions
 trainInt = pd.read_csv('/Users/admin/Documents/CodeProjects/numpy_projects/train.csv')
 test = pd.read_csv('/Users/admin/Documents/CodeProjects/numpy_projects/test.csv').drop(columns=['Total words'])
@@ -181,7 +182,7 @@ def log_reg(X_dropped, y_dropped):
     np.random.seed(1)
     X_train, X_test, Y_train, Y_test = skl_ms.train_test_split(X_dropped,y_dropped,test_size=0.3)
 
-    model = skl_lm.LogisticRegression(solver='liblinear',penalty='elasticnet')
+    model = skl_lm.LogisticRegression(solver='liblinear',penalty='l2')
     model.fit(X_train,Y_train)
 
     print('Model summary:')
@@ -194,7 +195,7 @@ def log_reg(X_dropped, y_dropped):
     predict_prob[0:5]
 
     prediction=np.empty(len(X_test), dtype=object)
-    prediction=np.where(predict_prob[:,0]>=0.5, 'Female', 'Male')
+    prediction=np.where(predict_prob[:,0]>=0.5, 0, 1)
     prediction[0:5]
 
     #Confusion matrix
@@ -208,6 +209,7 @@ def log_reg(X_dropped, y_dropped):
     mean_accuracy = np.mean(scores)
     print(scores)
     print('mean accuracy', mean_accuracy)
+    print('balanced accuracy:', skl_me.balanced_accuracy_score(Y_test,prediction))
 
 # LDA, QDA
 def LDA_QDA(X_dropped, y_dropped):
@@ -239,7 +241,7 @@ def LDA_QDA(X_dropped, y_dropped):
         print(predict_prob[0:10])
 
     prediction=np.empty(len(X_test), dtype=object)
-    prediction=np.where(predict_prob[:,0]>=0.5, 'Female', 'Male')
+    prediction=np.where(predict_prob[:,0]>=0.5, 0,1)
     print('First five predictions:')
     print(prediction[0:5],'\n')
 
@@ -255,6 +257,7 @@ def LDA_QDA(X_dropped, y_dropped):
     mean_accuracy = np.mean(scores)
     print(scores)
     print('mean accuracy', mean_accuracy)
+    print('balanced accuracy:', skl_me.balanced_accuracy_score(Y_test,prediction))
     return model
 
 # kNN
@@ -276,18 +279,24 @@ def kNN(X_dropped,y_dropped):
     plt.grid(True)
     plt.show()
     print(K[np.argmin(miss)])
-
+    np.random.seed(1)
 
     interestingK = [5,7,13,15]
     for k in interestingK:
-        np.random.seed(1)
+        
         model = skl_nb.KNeighborsClassifier(n_neighbors = k)
         model.fit(X_dropped, y_dropped)
+        prediction = model.predict(X_val)
 
         scores = skl_ms.cross_val_score(model, X_dropped, y_dropped, cv = 10)
         mean_accuracy = np.mean(scores)
         print('k:',k,'score:', scores)
         print('mean accuracy:', mean_accuracy)
+        print('balanced accuracy:', skl_me.balanced_accuracy_score(y_val,prediction))
+
+        #Confusion matrix
+    print('Confusion matrix')
+    print(pd.crosstab(prediction, y_val), '\n')
 
 ### Tree-based methods
 
@@ -308,14 +317,14 @@ def random_forest(X_dropped, y_dropped):
     # print(GS.best_params_)
     # setting up the training/testing-data
     np.random.seed(1)
-    X_train, X_val, y_train, y_val = skl_ms.train_test_split(X_dropped,y_dropped,test_size=0.25) 
+    X_train, X_val, y_train, y_val = skl_ms.train_test_split(X_dropped,y_dropped,test_size=0.3) 
     #print(train.info())
 
     # Modeling
     model = RandomForestClassifier(n_estimators=300)
     model.fit(X_train, y_train)
-    y_pred = model.predict(X_val)
-    accuracy = accuracy_score(y_val, y_pred)
+    prediction = model.predict(X_val)
+    accuracy = accuracy_score(y_val, prediction)
     error = round(np.mean(model.predict(X_val) != y_val),3)
     #print('Test error:', error,' and accuracy', accuracy)
 
@@ -324,11 +333,16 @@ def random_forest(X_dropped, y_dropped):
     mean_accuracy = np.mean(scores)
     print(scores)
     print('mean accuracy', mean_accuracy)
+    print('balanced accuracy:', skl_me.balanced_accuracy_score(y_val,prediction))
 
     # Calculate the mean accuracy across the 5 folds
     mean_accuracy = np.mean(scores)
     print('scores',scores)
     print('Cross validation mean accuracy', mean_accuracy)
+
+    #Confusion matrix
+    print('Confusion matrix')
+    print(pd.crosstab(prediction, y_val), '\n')
 
 def test_model(test,X_dropped,y_dropped):
     model = LDA_QDA(X_dropped, y_dropped)
@@ -347,6 +361,6 @@ def test_model(test,X_dropped,y_dropped):
 # money_maker(trainInt)
 #kNN(X_dropped, y_dropped)
 #LDA_QDA(X_dropped, y_dropped)
-log_reg(X_dropped, y_dropped)
-#random_forest(X_dropped, y_dropped)
+#log_reg(X_dropped, y_dropped)
+random_forest(X_dropped, y_dropped)
 #test_model(test, X_dropped, y_dropped)
