@@ -347,11 +347,11 @@ def random_forest(X_dropped, y_dropped):
 def test_model(test,X_dropped,y_dropped):
     model = LDA_QDA(X_dropped, y_dropped)
     prediction = model.predict(test)
-    binaryPred = [1 if i in 'Female' else 0 for i in prediction]
+    #binaryPred = [1 if i in 'Female' else 0 for i in prediction]
     print(prediction)
-    print(binaryPred, 'number of males', binaryPred.count(0),'out of', len(binaryPred))
-    predOutput = pd.DataFrame(binaryPred).T
-    filepath = Path('/Users/admin/Documents/CodeProjects/numpy_projects/predictions.csv')
+    #print(prediction, 'number of males', prediction.count(0),'out of', len(prediction))
+    predOutput = pd.DataFrame(prediction).T
+    filepath = Path('/Users/admin/Documents/CodeProjects/numpy_projects/predictions2.csv')
     predOutput.to_csv(filepath, index=False)
 
 

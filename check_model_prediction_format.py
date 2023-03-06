@@ -16,7 +16,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Argument parser")
     parser.add_argument(
         "--file",
-        default="prediction.csv",
+        default="",
         required=False,
         help="Path to a CSV file with predictions. Default: predictions.csv")
 
